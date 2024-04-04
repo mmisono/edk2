@@ -8,6 +8,12 @@ SPDX-License-Identifier: BSD-2-Clause-Patent
 
 #include "DxeMain.h"
 
+static inline UINT64 _rdtsc() {
+   UINT32 hi, lo;
+   __asm__ __volatile__ ("rdtsc" : "=a"(lo), "=d"(hi));
+   return ((UINT64)(lo)|((UINT64)(hi)<<32));
+}
+
 //
 // DXE Core Global Variables for Protocols from PEI
 //
@@ -256,7 +262,7 @@ DxeMain (
   //
   PERF_FUNCTION_BEGIN();
 
-  UINT64 StartTicks = GetPerformanceCounter();
+  UINT64 StartTicks = _rdtsc();
   DEBUG ((
     DEBUG_INFO,
     "%a: CSG-M4G1C: BEGIN (ticks): %" PRIu64 "\n",
@@ -276,7 +282,7 @@ DxeMain (
   Status = InitializeCpuExceptionHandlers (VectorInfoList);
   ASSERT_EFI_ERROR (Status);
 
-  UINT64 TempTicks = GetPerformanceCounter();
+  UINT64 TempTicks = _rdtsc();
   DEBUG ((
     DEBUG_INFO,
     "%a: CSG-M4G1C: TEMPP-1 (ticks): %" PRIu64 "\n",
@@ -304,7 +310,7 @@ DxeMain (
 
   MemoryProfileInit (HobStart);
 
-  TempTicks = GetPerformanceCounter();
+  TempTicks = _rdtsc();
   DEBUG ((
     DEBUG_INFO,
     "%a: CSG-M4G1C: TEMPP-2 (ticks): %" PRIu64 "\n",
@@ -324,7 +330,7 @@ DxeMain (
 
   gDxeCoreST->RuntimeServices = gDxeCoreRT;
 
-  TempTicks = GetPerformanceCounter();
+  TempTicks = _rdtsc();
   DEBUG ((
     DEBUG_INFO,
     "%a: CSG-M4G1C: TEMPP-21 (ticks): %" PRIu64 "\n",
@@ -338,7 +344,7 @@ DxeMain (
   Status = CoreInitializeImageServices (HobStart);
   ASSERT_EFI_ERROR (Status);
 
-  TempTicks = GetPerformanceCounter();
+  TempTicks = _rdtsc();
   DEBUG ((
     DEBUG_INFO,
     "%a: CSG-M4G1C: TEMPP-22 (ticks): %" PRIu64 "\n",
@@ -352,7 +358,7 @@ DxeMain (
   Status = CoreInitializeGcdServices (&HobStart, MemoryBaseAddress, MemoryLength);
   ASSERT_EFI_ERROR (Status);
 
-  TempTicks = GetPerformanceCounter();
+  TempTicks = _rdtsc();
   DEBUG ((
     DEBUG_INFO,
     "%a: CSG-M4G1C: TEMPP-23 (ticks): %" PRIu64 "\n",
@@ -369,7 +375,7 @@ DxeMain (
   // PERF_CROSSMODULE_END ("PEI");
   // PERF_CROSSMODULE_BEGIN ("DXE");
 
-  TempTicks = GetPerformanceCounter();
+  TempTicks = _rdtsc();
   DEBUG ((
     DEBUG_INFO,
     "%a: CSG-M4G1C: TEMPP-3 (ticks): %" PRIu64 "\n",
@@ -434,7 +440,7 @@ DxeMain (
     ASSERT_EFI_ERROR (Status);
   }
 
-  TempTicks = GetPerformanceCounter();
+  TempTicks = _rdtsc();
   DEBUG ((
     DEBUG_INFO,
     "%a: CSG-M4G1C: TEMPP-4 (ticks): %" PRIu64 "\n",
@@ -533,7 +539,7 @@ DxeMain (
   CoreInitializeMemoryAttributesTable ();
   CoreInitializeMemoryProtection ();
 
-  TempTicks = GetPerformanceCounter();
+  TempTicks = _rdtsc();
   DEBUG ((
     DEBUG_INFO,
     "%a: CSG-M4G1C: TEMPP-5 (ticks): %" PRIu64 "\n",
@@ -584,7 +590,7 @@ DxeMain (
              );
   ASSERT_EFI_ERROR (Status);
 
-  TempTicks = GetPerformanceCounter();
+  TempTicks = _rdtsc();
   DEBUG ((
     DEBUG_INFO,
     "%a: CSG-M4G1C: TEMPP-6 (ticks): %" PRIu64 "\n",
@@ -614,7 +620,7 @@ DxeMain (
   Status = InitializeSectionExtraction (gDxeCoreImageHandle, gDxeCoreST);
   ASSERT_EFI_ERROR (Status);
 
-  TempTicks = GetPerformanceCounter();
+  TempTicks = _rdtsc();
   DEBUG ((
     DEBUG_INFO,
     "%a: CSG-M4G1C: TEMPP-7 (ticks): %" PRIu64 "\n",
@@ -627,7 +633,7 @@ DxeMain (
   //
   CoreInitializeDispatcher ();
 
-  TempTicks = GetPerformanceCounter();
+  TempTicks = _rdtsc();
   DEBUG ((
     DEBUG_INFO,
     "%a: CSG-M4G1C: TEMPP-71 (ticks): %" PRIu64 "\n",
@@ -640,7 +646,7 @@ DxeMain (
   //
   CoreDispatcher ();
 
-  TempTicks = GetPerformanceCounter();
+  TempTicks = _rdtsc();
   DEBUG ((
     DEBUG_INFO,
     "%a: CSG-M4G1C: TEMPP-72 (ticks): %" PRIu64 "\n",
@@ -663,7 +669,7 @@ DxeMain (
   CoreDisplayDiscoveredNotDispatched ();
   DEBUG_CODE_END ();
 
-  TempTicks = GetPerformanceCounter();
+  TempTicks = _rdtsc();
   DEBUG ((
     DEBUG_INFO,
     "%a: CSG-M4G1C: TEMPP-8 (ticks): %" PRIu64 "\n",
@@ -697,7 +703,7 @@ DxeMain (
 
   PERF_FUNCTION_END();
 
-  UINT64 EndTicks = GetPerformanceCounter();
+  UINT64 EndTicks = _rdtsc();
   DEBUG ((
     DEBUG_INFO,
     "%a: CSG-M4G1C: END (ticks): %" PRIu64 "\n",

@@ -31,6 +31,12 @@
 
 #include <inttypes.h>
 
+static inline UINT64 _rdtsc() {
+   UINT32 hi, lo;
+   __asm__ __volatile__ ("rdtsc" : "=a"(lo), "=d"(hi));
+   return ((UINT64)(lo)|((UINT64)(hi)<<32));
+}
+
 //
 // Static data that hosts the fw_cfg blobs and serves file requests.
 //
@@ -1048,7 +1054,7 @@ QemuKernelLoaderFsDxeEntrypoint (
   EFI_HANDLE   FileSystemHandle;
   EFI_HANDLE   InitrdLoadFile2Handle;
 
-  UINT64 StartTicks = GetPerformanceCounter();
+  UINT64 StartTicks = _rdtsc();
   DEBUG ((
     DEBUG_INFO,
     "%a: CSG-M4G1C: BEGIN (ticks): %" PRIu64 "\n",
@@ -1139,7 +1145,7 @@ QemuKernelLoaderFsDxeEntrypoint (
     }
   }
 
-  UINT64 EndTicks = GetPerformanceCounter();
+  UINT64 EndTicks = _rdtsc();
   DEBUG ((
     DEBUG_INFO,
     "%a: CSG-M4G1C: END (ticks): %" PRIu64 "\n",

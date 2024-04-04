@@ -8,6 +8,12 @@ SPDX-License-Identifier: BSD-2-Clause-Patent
 
 #include "PeiMain.h"
 
+static inline UINT64 _rdtsc() {
+   UINT32 hi, lo;
+   __asm__ __volatile__ ("rdtsc" : "=a"(lo), "=d"(hi));
+   return ((UINT64)(lo)|((UINT64)(hi)<<32));
+}
+
 EFI_PEI_PPI_DESCRIPTOR  mMemoryDiscoveredPpi = {
   (EFI_PEI_PPI_DESCRIPTOR_PPI | EFI_PEI_PPI_DESCRIPTOR_TERMINATE_LIST),
   &gEfiPeiMemoryDiscoveredPpiGuid,
@@ -180,7 +186,7 @@ PeiCore (
   UINTN                           Index;
 
   UINT64 Frequency = GetPerformanceCounterProperties (NULL, NULL);
-  UINT64 StartTicks = GetPerformanceCounter();
+  UINT64 StartTicks = _rdtsc();
   //
   // CSG: also log the ticks, as we are at the very begining
   DEBUG ((
@@ -540,7 +546,7 @@ PeiCore (
     CpuDeadLoop ();
   }
 
-  UINT64 EndTicks = GetPerformanceCounter();
+  UINT64 EndTicks = _rdtsc();
   DEBUG ((
     DEBUG_INFO,
     "%a: CSG-M4G1C: END (ticks): %" PRIu64 "\n",

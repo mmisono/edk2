@@ -10,6 +10,13 @@ SPDX-License-Identifier: BSD-2-Clause-Patent
 
 #include "DxeIpl.h"
 
+static inline UINT64 _rdtsc() {
+   UINT32 hi, lo;
+   __asm__ __volatile__ ("rdtsc" : "=a"(lo), "=d"(hi));
+   return ((UINT64)(lo)|((UINT64)(hi)<<32));
+}
+
+
 //
 // Module Globals used in the DXE to PEI hand off
 // These must be module globals, so the stack can be switched
@@ -268,7 +275,7 @@ DxeLoadCore (
   EFI_MEMORY_TYPE_INFORMATION      MemoryData[EfiMaxMemoryType + 1];
   VOID                             *CapsuleOnDiskModePpi;
 
-  UINT64 StartTicks = GetPerformanceCounter();
+  UINT64 StartTicks = _rdtsc();
   DEBUG ((
     DEBUG_INFO,
     "%a: CSG-M4G1C: BEGIN (ticks): %" PRIu64 "\n",
@@ -452,7 +459,7 @@ DxeLoadCore (
 
   DEBUG ((DEBUG_INFO | DEBUG_LOAD, "Loading DXE CORE at 0x%11p EntryPoint=0x%11p\n", (VOID *)(UINTN)DxeCoreAddress, FUNCTION_ENTRY_POINT (DxeCoreEntryPoint)));
 
-  UINT64 EndTicks = GetPerformanceCounter();
+  UINT64 EndTicks = _rdtsc();
   DEBUG ((
     DEBUG_INFO,
     "%a: CSG-M4G1C: END (ticks): %" PRIu64 "\n",

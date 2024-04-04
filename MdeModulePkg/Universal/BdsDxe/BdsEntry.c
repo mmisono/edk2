@@ -20,6 +20,12 @@ SPDX-License-Identifier: BSD-2-Clause-Patent
 #include <Library/TimerLib.h>
 #include <inttypes.h>
 
+static inline UINT64 _rdtsc() {
+   UINT32 hi, lo;
+   __asm__ __volatile__ ("rdtsc" : "=a"(lo), "=d"(hi));
+   return ((UINT64)(lo)|((UINT64)(hi)<<32));
+}
+
 #define SET_BOOT_OPTION_SUPPORT_KEY_COUNT(a, c)  { \
       (a) = ((a) & ~EFI_BOOT_OPTION_SUPPORT_COUNT) | (((c) << LowBitSet32 (EFI_BOOT_OPTION_SUPPORT_COUNT)) & EFI_BOOT_OPTION_SUPPORT_COUNT); \
       }
@@ -699,7 +705,7 @@ BdsEntry (
   Status          = EFI_SUCCESS;
   BootSuccess     = FALSE;
 
-  UINT64 StartTicks = GetPerformanceCounter();
+  UINT64 StartTicks = _rdtsc();
   DEBUG ((
     DEBUG_INFO,
     "%a: CSG-M4G1C: BEGIN (ticks): %" PRIu64 "\n",
@@ -926,7 +932,7 @@ BdsEntry (
 
   PERF_INMODULE_END ("EfiBootManagerConnectAllDefaultConsoles");
 
-  UINT64 EndTicks = GetPerformanceCounter();
+  UINT64 EndTicks = _rdtsc();
   DEBUG ((
     DEBUG_INFO,
     "%a: CSG-M4G1C: END (ticks): %" PRIu64 "\n",

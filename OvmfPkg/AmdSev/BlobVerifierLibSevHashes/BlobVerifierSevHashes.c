@@ -16,6 +16,12 @@
 #include <Library/TimerLib.h>
 #include <inttypes.h>
 
+static inline UINT64 _rdtsc() {
+   UINT32 hi, lo;
+   __asm__ __volatile__ ("rdtsc" : "=a"(lo), "=d"(hi));
+   return ((UINT64)(lo)|((UINT64)(hi)<<32));
+}
+
 /**
   The SEV Hashes table must be in encrypted memory and has the table
   and its entries described by
@@ -99,7 +105,7 @@ VerifyBlob (
   INT32       Remaining;
   HASH_TABLE  *Entry;
 
-  UINT64 StartTicks = GetPerformanceCounter();
+  UINT64 StartTicks = _rdtsc();
   DEBUG ((
     DEBUG_INFO,
     "%a-%s: CSG-M4G1C: BEGIN (ticks): %" PRIu64 "\n",
@@ -183,7 +189,7 @@ VerifyBlob (
         ));
     }
 
-    UINT64 EndTicks = GetPerformanceCounter();
+    UINT64 EndTicks = _rdtsc();
     DEBUG ((
       DEBUG_INFO,
       "%a-%s: CSG-M4G1C: END (ticks): %" PRIu64 "\n",

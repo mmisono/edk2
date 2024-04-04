@@ -16,6 +16,12 @@
 #include <Library/TimerLib.h>
 #include <inttypes.h>
 
+static inline UINT64 _rdtsc() {
+   UINT32 hi, lo;
+   __asm__ __volatile__ ("rdtsc" : "=a"(lo), "=d"(hi));
+   return ((UINT64)(lo)|((UINT64)(hi)<<32));
+}
+
 EFI_STATUS
 TryRunningQemuKernel (
   VOID
@@ -24,7 +30,7 @@ TryRunningQemuKernel (
   EFI_STATUS  Status;
   EFI_HANDLE  KernelImageHandle;
 
-  UINT64 StartTicks = GetPerformanceCounter();
+  UINT64 StartTicks = _rdtsc();
   DEBUG ((
     DEBUG_INFO,
     "%a: CSG-M4G1C: BEGIN (ticks): %" PRIu64 "\n",
@@ -47,7 +53,7 @@ TryRunningQemuKernel (
     (EFI_SOFTWARE_DXE_BS_DRIVER | EFI_SW_DXE_BS_PC_READY_TO_BOOT_EVENT)
     );
 
-  UINT64 EndTicks = GetPerformanceCounter();
+  UINT64 EndTicks = _rdtsc();
   DEBUG ((
     DEBUG_INFO,
     "%a: CSG-M4G1C: END (ticks): %" PRIu64 "\n",
