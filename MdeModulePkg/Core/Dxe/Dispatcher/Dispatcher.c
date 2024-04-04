@@ -408,6 +408,14 @@ CoreDispatcher (
   BOOLEAN                ReadyToRun;
   EFI_EVENT              DxeDispatchEvent;
 
+  UINT64 StartTicks = GetPerformanceCounter();
+  DEBUG ((
+    DEBUG_INFO,
+    "%a: CSG-M4G1C: BEGIN (ticks): %" PRIu64 "\n",
+    __FUNCTION__,
+    StartTicks
+  ));
+
   PERF_FUNCTION_BEGIN ();
 
   if (gDispatcherRunning) {
@@ -574,6 +582,14 @@ CoreDispatcher (
   gDispatcherRunning = FALSE;
 
   PERF_FUNCTION_END ();
+
+  UINT64 EndTicks = GetPerformanceCounter();
+  DEBUG ((
+    DEBUG_INFO,
+    "%a: CSG-M4G1C: END (ticks): %" PRIu64 "\n",
+    __FUNCTION__,
+    EndTicks
+  ));
 
   return ReturnStatus;
 }

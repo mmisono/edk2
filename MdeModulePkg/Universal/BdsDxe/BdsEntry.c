@@ -17,6 +17,9 @@ SPDX-License-Identifier: BSD-2-Clause-Patent
 #include "HwErrRecSupport.h"
 #include <Library/VariablePolicyHelperLib.h>
 
+#include <Library/TimerLib.h>
+#include <inttypes.h>
+
 #define SET_BOOT_OPTION_SUPPORT_KEY_COUNT(a, c)  { \
       (a) = ((a) & ~EFI_BOOT_OPTION_SUPPORT_COUNT) | (((c) << LowBitSet32 (EFI_BOOT_OPTION_SUPPORT_COUNT)) & EFI_BOOT_OPTION_SUPPORT_COUNT); \
       }
@@ -696,6 +699,14 @@ BdsEntry (
   Status          = EFI_SUCCESS;
   BootSuccess     = FALSE;
 
+  UINT64 StartTicks = GetPerformanceCounter();
+  DEBUG ((
+    DEBUG_INFO,
+    "%a: CSG-M4G1C: BEGIN (ticks): %" PRIu64 "\n",
+    __FUNCTION__,
+    StartTicks
+  ));
+
   //
   // Insert the performance probe
   //
@@ -914,6 +925,14 @@ BdsEntry (
   }
 
   PERF_INMODULE_END ("EfiBootManagerConnectAllDefaultConsoles");
+
+  UINT64 EndTicks = GetPerformanceCounter();
+  DEBUG ((
+    DEBUG_INFO,
+    "%a: CSG-M4G1C: END (ticks): %" PRIu64 "\n",
+    __FUNCTION__,
+    EndTicks
+  ));
 
   //
   // Do the platform specific action after the console is ready

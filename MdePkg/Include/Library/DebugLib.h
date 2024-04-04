@@ -416,16 +416,21 @@ UnitTestDebugAssert (
 
 
 **/
-#if !defined (MDEPKG_NDEBUG)
+//
+// CSG: get the DEBUG (INFO) logs even if building the RELEASE target.
+// Empirically, this introduces around 0.5 s extra to the start-up
+// time
+//
+// #if !defined (MDEPKG_NDEBUG)
 #define DEBUG(Expression)        \
     do {                           \
       if (DebugPrintEnabled ()) {  \
         _DEBUG (Expression);       \
       }                            \
     } while (FALSE)
-#else
-#define DEBUG(Expression)
-#endif
+// #else
+// #define DEBUG(Expression)
+// #endif
 
 /**
   Macro that calls DebugAssert() if an EFI_STATUS evaluates to an error code.

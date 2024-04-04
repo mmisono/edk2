@@ -13,6 +13,8 @@
 #include <Library/BaseMemoryLib.h>
 #include <Library/DebugLib.h>
 #include <Library/BlobVerifierLib.h>
+#include <Library/TimerLib.h>
+#include <inttypes.h>
 
 /**
   The SEV Hashes table must be in encrypted memory and has the table
@@ -97,6 +99,15 @@ VerifyBlob (
   INT32       Remaining;
   HASH_TABLE  *Entry;
 
+  UINT64 StartTicks = GetPerformanceCounter();
+  DEBUG ((
+    DEBUG_INFO,
+    "%a-%s: CSG-M4G1C: BEGIN (ticks): %" PRIu64 "\n",
+    __FUNCTION__,
+    BlobName,
+    StartTicks
+  ));
+
   if ((mHashesTable == NULL) || (mHashesTableSize == 0)) {
     DEBUG ((
       DEBUG_ERROR,
@@ -171,6 +182,15 @@ VerifyBlob (
         BlobName
         ));
     }
+
+    UINT64 EndTicks = GetPerformanceCounter();
+    DEBUG ((
+      DEBUG_INFO,
+      "%a-%s: CSG-M4G1C: END (ticks): %" PRIu64 "\n",
+      __FUNCTION__,
+      BlobName,
+      EndTicks
+    ));
 
     return Status;
   }

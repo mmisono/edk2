@@ -245,6 +245,26 @@ DxeMain (
   VOID                          *EntryPoint;
 
   //
+  // CSG: until TEMPP-3 we don't have a good way to measure performance
+  // counter ticks, as GetPerformanceCounter() always returns zero. My bet
+  // is that the performance counter's can't be queried until we call
+  // ProcessLibraryConstructorList() later in this method.
+  // TODO: find a way to enable the AcpiTimerLib at the begining of
+  // this methd to work out where time is actually spent.
+  // TODO: once the previous TODO is done, change the TEMPP labels
+  // for something more meaningful (once we know where time is spent)
+  //
+  PERF_FUNCTION_BEGIN();
+
+  UINT64 StartTicks = GetPerformanceCounter();
+  DEBUG ((
+    DEBUG_INFO,
+    "%a: CSG-M4G1C: BEGIN (ticks): %" PRIu64 "\n",
+    __FUNCTION__,
+    StartTicks
+  ));
+
+  //
   // Setup the default exception handlers
   //
   VectorInfoList = NULL;
@@ -255,6 +275,14 @@ DxeMain (
 
   Status = InitializeCpuExceptionHandlers (VectorInfoList);
   ASSERT_EFI_ERROR (Status);
+
+  UINT64 TempTicks = GetPerformanceCounter();
+  DEBUG ((
+    DEBUG_INFO,
+    "%a: CSG-M4G1C: TEMPP-1 (ticks): %" PRIu64 "\n",
+    __FUNCTION__,
+    TempTicks
+  ));
 
   //
   // Setup Stack Guard
@@ -276,6 +304,14 @@ DxeMain (
 
   MemoryProfileInit (HobStart);
 
+  TempTicks = GetPerformanceCounter();
+  DEBUG ((
+    DEBUG_INFO,
+    "%a: CSG-M4G1C: TEMPP-2 (ticks): %" PRIu64 "\n",
+    __FUNCTION__,
+    TempTicks
+  ));
+
   //
   // Allocate the EFI System Table and EFI Runtime Service Table from EfiRuntimeServicesData
   // Use the templates to initialize the contents of the EFI System Table and EFI Runtime Services Table
@@ -288,11 +324,27 @@ DxeMain (
 
   gDxeCoreST->RuntimeServices = gDxeCoreRT;
 
+  TempTicks = GetPerformanceCounter();
+  DEBUG ((
+    DEBUG_INFO,
+    "%a: CSG-M4G1C: TEMPP-21 (ticks): %" PRIu64 "\n",
+    __FUNCTION__,
+    TempTicks
+  ));
+
   //
   // Start the Image Services.
   //
   Status = CoreInitializeImageServices (HobStart);
   ASSERT_EFI_ERROR (Status);
+
+  TempTicks = GetPerformanceCounter();
+  DEBUG ((
+    DEBUG_INFO,
+    "%a: CSG-M4G1C: TEMPP-22 (ticks): %" PRIu64 "\n",
+    __FUNCTION__,
+    TempTicks
+  ));
 
   //
   // Initialize the Global Coherency Domain Services
@@ -300,12 +352,30 @@ DxeMain (
   Status = CoreInitializeGcdServices (&HobStart, MemoryBaseAddress, MemoryLength);
   ASSERT_EFI_ERROR (Status);
 
+  TempTicks = GetPerformanceCounter();
+  DEBUG ((
+    DEBUG_INFO,
+    "%a: CSG-M4G1C: TEMPP-23 (ticks): %" PRIu64 "\n",
+    __FUNCTION__,
+    TempTicks
+  ));
+
   //
   // Call constructor for all libraries
   //
+  // CSG: annoyingly it seems that we can only access the performance counter
+  // after we have called all the constructors (before that it just returns 0)
   ProcessLibraryConstructorList (gDxeCoreImageHandle, gDxeCoreST);
-  PERF_CROSSMODULE_END ("PEI");
-  PERF_CROSSMODULE_BEGIN ("DXE");
+  // PERF_CROSSMODULE_END ("PEI");
+  // PERF_CROSSMODULE_BEGIN ("DXE");
+
+  TempTicks = GetPerformanceCounter();
+  DEBUG ((
+    DEBUG_INFO,
+    "%a: CSG-M4G1C: TEMPP-3 (ticks): %" PRIu64 "\n",
+    __FUNCTION__,
+    TempTicks
+  ));
 
   //
   // Log MemoryBaseAddress and MemoryLength again (from
@@ -363,6 +433,14 @@ DxeMain (
     Status = CoreInstallConfigurationTable (&gLoadFixedAddressConfigurationTableGuid, &gLoadModuleAtFixAddressConfigurationTable);
     ASSERT_EFI_ERROR (Status);
   }
+
+  TempTicks = GetPerformanceCounter();
+  DEBUG ((
+    DEBUG_INFO,
+    "%a: CSG-M4G1C: TEMPP-4 (ticks): %" PRIu64 "\n",
+    __FUNCTION__,
+    TempTicks
+  ));
 
   //
   // Report Status Code here for DXE_ENTRY_POINT once it is available
@@ -455,6 +533,14 @@ DxeMain (
   CoreInitializeMemoryAttributesTable ();
   CoreInitializeMemoryProtection ();
 
+  TempTicks = GetPerformanceCounter();
+  DEBUG ((
+    DEBUG_INFO,
+    "%a: CSG-M4G1C: TEMPP-5 (ticks): %" PRIu64 "\n",
+    __FUNCTION__,
+    TempTicks
+  ));
+
   //
   // Get persisted vector hand-off info from GUIDeed HOB again due to HobStart may be updated,
   // and install configuration table
@@ -498,6 +584,14 @@ DxeMain (
              );
   ASSERT_EFI_ERROR (Status);
 
+  TempTicks = GetPerformanceCounter();
+  DEBUG ((
+    DEBUG_INFO,
+    "%a: CSG-M4G1C: TEMPP-6 (ticks): %" PRIu64 "\n",
+    __FUNCTION__,
+    TempTicks
+  ));
+
   //
   // Register for the GUIDs of the Architectural Protocols, so the rest of the
   // EFI Boot Services and EFI Runtime Services tables can be filled in.
@@ -520,15 +614,39 @@ DxeMain (
   Status = InitializeSectionExtraction (gDxeCoreImageHandle, gDxeCoreST);
   ASSERT_EFI_ERROR (Status);
 
+  TempTicks = GetPerformanceCounter();
+  DEBUG ((
+    DEBUG_INFO,
+    "%a: CSG-M4G1C: TEMPP-7 (ticks): %" PRIu64 "\n",
+    __FUNCTION__,
+    TempTicks
+  ));
+
   //
   // Initialize the DXE Dispatcher
   //
   CoreInitializeDispatcher ();
 
+  TempTicks = GetPerformanceCounter();
+  DEBUG ((
+    DEBUG_INFO,
+    "%a: CSG-M4G1C: TEMPP-71 (ticks): %" PRIu64 "\n",
+    __FUNCTION__,
+    TempTicks
+  ));
+
   //
   // Invoke the DXE Dispatcher
   //
   CoreDispatcher ();
+
+  TempTicks = GetPerformanceCounter();
+  DEBUG ((
+    DEBUG_INFO,
+    "%a: CSG-M4G1C: TEMPP-72 (ticks): %" PRIu64 "\n",
+    __FUNCTION__,
+    TempTicks
+  ));
 
   //
   // Display Architectural protocols that were not loaded if this is DEBUG build
@@ -544,6 +662,14 @@ DxeMain (
   DEBUG_CODE_BEGIN ();
   CoreDisplayDiscoveredNotDispatched ();
   DEBUG_CODE_END ();
+
+  TempTicks = GetPerformanceCounter();
+  DEBUG ((
+    DEBUG_INFO,
+    "%a: CSG-M4G1C: TEMPP-8 (ticks): %" PRIu64 "\n",
+    __FUNCTION__,
+    TempTicks
+  ));
 
   //
   // Assert if the Architectural Protocols are not present.
@@ -568,6 +694,16 @@ DxeMain (
     EFI_PROGRESS_CODE,
     (EFI_SOFTWARE_DXE_CORE | EFI_SW_DXE_CORE_PC_HANDOFF_TO_NEXT)
     );
+
+  PERF_FUNCTION_END();
+
+  UINT64 EndTicks = GetPerformanceCounter();
+  DEBUG ((
+    DEBUG_INFO,
+    "%a: CSG-M4G1C: END (ticks): %" PRIu64 "\n",
+    __FUNCTION__,
+    EndTicks
+  ));
 
   //
   // Transfer control to the BDS Architectural Protocol

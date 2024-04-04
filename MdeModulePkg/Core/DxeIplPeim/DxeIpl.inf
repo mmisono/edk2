@@ -79,6 +79,7 @@
   DebugAgentLib
   PeiServicesTablePointerLib
   PerformanceLib
+  TimerLib
 
 [LibraryClasses.ARM, LibraryClasses.AARCH64]
   ArmMmuLib

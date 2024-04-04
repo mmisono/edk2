@@ -46,6 +46,10 @@ SPDX-License-Identifier: BSD-2-Clause-Patent
 #include <Guid/AprioriFileName.h>
 #include <Guid/MigratedFvInfo.h>
 
+#include <Library/DebugLib.h>
+#include <Library/TimerLib.h>
+#include <inttypes.h>
+
 ///
 /// It is an FFS type extension used for PeiFindFileEx. It indicates current
 /// FFS searching is for all PEIMs can be dispatched by PeiCore.

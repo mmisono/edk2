@@ -13,6 +13,9 @@
 #include <Library/ReportStatusCodeLib.h>
 #include <Library/UefiLib.h>
 
+#include <Library/TimerLib.h>
+#include <inttypes.h>
+
 EFI_STATUS
 TryRunningQemuKernel (
   VOID
@@ -20,6 +23,14 @@ TryRunningQemuKernel (
 {
   EFI_STATUS  Status;
   EFI_HANDLE  KernelImageHandle;
+
+  UINT64 StartTicks = GetPerformanceCounter();
+  DEBUG ((
+    DEBUG_INFO,
+    "%a: CSG-M4G1C: BEGIN (ticks): %" PRIu64 "\n",
+    __FUNCTION__,
+    StartTicks
+  ));
 
   Status = QemuLoadKernelImage (&KernelImageHandle);
   if (EFI_ERROR (Status)) {
@@ -36,6 +47,22 @@ TryRunningQemuKernel (
     (EFI_SOFTWARE_DXE_BS_DRIVER | EFI_SW_DXE_BS_PC_READY_TO_BOOT_EVENT)
     );
 
+  UINT64 EndTicks = GetPerformanceCounter();
+  DEBUG ((
+    DEBUG_INFO,
+    "%a: CSG-M4G1C: END (ticks): %" PRIu64 "\n",
+    __FUNCTION__,
+    EndTicks
+  ));
+  UINT64 Frequency = GetPerformanceCounterProperties (NULL, NULL);
+  DEBUG ((
+    DEBUG_INFO,
+    "%a: CSG-M4G1C: 3ND (ticks): %" PRIu64 " Freq: %" PRIu64 "\n",
+    __FUNCTION__,
+    EndTicks,
+    Frequency
+  ));
+
   //
   // Start the image.
   //
@@ -48,6 +75,15 @@ TryRunningQemuKernel (
       Status
       ));
   }
+
+  //
+  // CSG: CoCo boots directly from the initrd, so we never return from the StartKernel call
+  //
+  DEBUG ((
+    DEBUG_INFO,
+    "%a: CSG-M4G1C: NOT HERE\n",
+    __FUNCTION__
+  ));
 
   QemuUnloadKernelImage (KernelImageHandle);
 

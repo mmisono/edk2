@@ -13,6 +13,9 @@
 #include <Library/PlatformBmPrintScLib.h>
 #include <Library/Tcg2PhysicalPresenceLib.h>
 
+#include <Library/TimerLib.h>
+#include <inttypes.h>
+
 //
 // Global data
 //
@@ -1399,6 +1402,14 @@ PlatformBootManagerAfterConsole (
 {
   EFI_BOOT_MODE  BootMode;
 
+  UINT64 StartTicks = GetPerformanceCounter();
+  DEBUG ((
+    DEBUG_INFO,
+    "%a: CSG-M4G1C: BEGIN (ticks): %" PRIu64 "\n",
+    __FUNCTION__,
+    StartTicks
+  ));
+
   DEBUG ((DEBUG_INFO, "PlatformBootManagerAfterConsole\n"));
 
   //
@@ -1422,6 +1433,14 @@ PlatformBootManagerAfterConsole (
   // Set PCI Interrupt Line registers and ACPI SCI_EN
   //
   PciAcpiInitialization ();
+
+  UINT64 EndTicks = GetPerformanceCounter();
+  DEBUG ((
+    DEBUG_INFO,
+    "%a: CSG-M4G1C: END (ticks): %" PRIu64 "\n",
+    __FUNCTION__,
+    EndTicks
+  ));
 
   //
   // Process QEMU's -kernel command line option

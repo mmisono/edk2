@@ -85,6 +85,9 @@ SPDX-License-Identifier: BSD-2-Clause-Patent
 #include <Library/DebugAgentLib.h>
 #include <Library/CpuExceptionHandlerLib.h>
 
+#include <Library/TimerLib.h>
+#include <inttypes.h>
+
 //
 // attributes for reserved memory before it is promoted to system memory
 //

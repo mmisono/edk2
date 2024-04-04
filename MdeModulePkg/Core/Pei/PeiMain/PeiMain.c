@@ -179,6 +179,24 @@ PeiCore (
   EFI_PEI_TEMPORARY_RAM_DONE_PPI  *TemporaryRamDonePpi;
   UINTN                           Index;
 
+  UINT64 Frequency = GetPerformanceCounterProperties (NULL, NULL);
+  UINT64 StartTicks = GetPerformanceCounter();
+  //
+  // CSG: also log the ticks, as we are at the very begining
+  DEBUG ((
+    DEBUG_INFO,
+    "%a: CSG-M4G1C: G3N3S1S (ticks): %" PRIu64 " Freq: %" PRIu64 "\n",
+    __FUNCTION__,
+    StartTicks,
+    Frequency
+  ));
+  DEBUG ((
+    DEBUG_INFO,
+    "%a: CSG-M4G1C: BEGIN (ticks): %" PRIu64 "\n",
+    __FUNCTION__,
+    StartTicks
+  ));
+
   //
   // Retrieve context passed into PEI Core
   //
@@ -521,6 +539,14 @@ PeiCore (
       );
     CpuDeadLoop ();
   }
+
+  UINT64 EndTicks = GetPerformanceCounter();
+  DEBUG ((
+    DEBUG_INFO,
+    "%a: CSG-M4G1C: END (ticks): %" PRIu64 "\n",
+    __FUNCTION__,
+    EndTicks
+  ));
 
   //
   // Enter DxeIpl to load Dxe core.

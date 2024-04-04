@@ -22,11 +22,14 @@
 #include <Library/DevicePathLib.h>
 #include <Library/MemoryAllocationLib.h>
 #include <Library/QemuFwCfgLib.h>
+#include <Library/TimerLib.h>
 #include <Library/UefiBootServicesTableLib.h>
 #include <Library/UefiRuntimeServicesTableLib.h>
 #include <Protocol/DevicePath.h>
 #include <Protocol/LoadFile2.h>
 #include <Protocol/SimpleFileSystem.h>
+
+#include <inttypes.h>
 
 //
 // Static data that hosts the fw_cfg blobs and serves file requests.
@@ -1045,6 +1048,14 @@ QemuKernelLoaderFsDxeEntrypoint (
   EFI_HANDLE   FileSystemHandle;
   EFI_HANDLE   InitrdLoadFile2Handle;
 
+  UINT64 StartTicks = GetPerformanceCounter();
+  DEBUG ((
+    DEBUG_INFO,
+    "%a: CSG-M4G1C: BEGIN (ticks): %" PRIu64 "\n",
+    __FUNCTION__,
+    StartTicks
+  ));
+
   if (!QemuFwCfgIsAvailable ()) {
     return EFI_NOT_FOUND;
   }
@@ -1127,6 +1138,14 @@ QemuKernelLoaderFsDxeEntrypoint (
       goto UninstallFileSystemHandle;
     }
   }
+
+  UINT64 EndTicks = GetPerformanceCounter();
+  DEBUG ((
+    DEBUG_INFO,
+    "%a: CSG-M4G1C: END (ticks): %" PRIu64 "\n",
+    __FUNCTION__,
+    EndTicks
+  ));
 
   return EFI_SUCCESS;
 

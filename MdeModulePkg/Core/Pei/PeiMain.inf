@@ -66,6 +66,7 @@
   PeCoffLib
   PeiServicesTablePointerLib
   PcdLib
+  TimerLib
 
 [Guids]
   gPeiAprioriFileNameGuid       ## SOMETIMES_CONSUMES   ## File
