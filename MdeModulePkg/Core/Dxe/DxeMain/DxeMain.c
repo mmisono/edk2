@@ -8,6 +8,16 @@ SPDX-License-Identifier: BSD-2-Clause-Patent
 
 #include "DxeMain.h"
 
+static inline void _outb(UINT16 port, UINT8 val) {
+  asm volatile("outb %0, %1" : : "a"(val), "d"(port));
+}
+#define BENCHMARK_PORT 0xf4
+#define RECORD_EVENT(event) _outb(BENCHMARK_PORT, event)
+#define EVENT_DXE                100
+#define EVENT_DXE_MAIN_START     (EVENT_DXE + 0)
+#define EVENT_DXE_MAIN_END       (EVENT_DXE + 1)
+#define EVENT_EXIT_BOOT_SERVICES (EVENT_DXE + 2)
+
 //
 // DXE Core Global Variables for Protocols from PEI
 //
@@ -243,6 +253,8 @@ DxeMain (
   EFI_VECTOR_HANDOFF_INFO       *VectorInfoList;
   EFI_VECTOR_HANDOFF_INFO       *VectorInfo;
   VOID                          *EntryPoint;
+
+  RECORD_EVENT(EVENT_DXE_MAIN_START);
 
   //
   // Setup the default exception handlers
@@ -569,6 +581,8 @@ DxeMain (
     (EFI_SOFTWARE_DXE_CORE | EFI_SW_DXE_CORE_PC_HANDOFF_TO_NEXT)
     );
 
+  RECORD_EVENT(EVENT_DXE_MAIN_END);
+
   //
   // Transfer control to the BDS Architectural Protocol
   //
@@ -839,6 +853,8 @@ CoreExitBootServices (
   // Update the AtRuntime field in Runtiem AP.
   //
   gRuntime->AtRuntime = TRUE;
+
+  RECORD_EVENT(EVENT_EXIT_BOOT_SERVICES);
 
   return Status;
 }

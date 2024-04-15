@@ -8,6 +8,15 @@ SPDX-License-Identifier: BSD-2-Clause-Patent
 
 #include "PeiMain.h"
 
+static inline void _outb(UINT16 port, UINT8 val) {
+  asm volatile("outb %0, %1" : : "a"(val), "d"(port));
+}
+#define BENCHMARK_PORT 0xf4
+#define RECORD_EVENT(event) _outb(BENCHMARK_PORT, event)
+#define EVENT_PEI                0
+#define EVENT_PEI_CORE_START     (EVENT_PEI + 0)
+#define EVENT_PEI_CORE_END       (EVENT_PEI + 1)
+
 EFI_PEI_PPI_DESCRIPTOR  mMemoryDiscoveredPpi = {
   (EFI_PEI_PPI_DESCRIPTOR_PPI | EFI_PEI_PPI_DESCRIPTOR_TERMINATE_LIST),
   &gEfiPeiMemoryDiscoveredPpiGuid,
@@ -178,6 +187,8 @@ PeiCore (
   EFI_HOB_HANDOFF_INFO_TABLE      *HandoffInformationTable;
   EFI_PEI_TEMPORARY_RAM_DONE_PPI  *TemporaryRamDonePpi;
   UINTN                           Index;
+
+  RECORD_EVENT(EVENT_PEI_CORE_START);
 
   //
   // Retrieve context passed into PEI Core
@@ -521,6 +532,8 @@ PeiCore (
       );
     CpuDeadLoop ();
   }
+
+  RECORD_EVENT(EVENT_PEI_CORE_END);
 
   //
   // Enter DxeIpl to load Dxe core.
